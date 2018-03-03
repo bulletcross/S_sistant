@@ -1,2 +1,5 @@
 # S_sistant
-Sleep Assistant: An applicaion to assist user to go to bed, to maximise next day productivity. Application employ on device learning to predict the best sleep time based on user's active phone usage, number of steps taken and heart rate data coming from smart watch.
+
+An assistance provided to user such that important notifications are not missed when user in not in the vicinity.
+
+A proof of concept to realize the above described system.

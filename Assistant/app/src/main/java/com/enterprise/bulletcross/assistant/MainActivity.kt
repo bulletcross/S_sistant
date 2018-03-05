@@ -12,6 +12,10 @@ import android.widget.TextView
 import com.jjoe64.graphview.GraphView
 import com.jjoe64.graphview.series.DataPoint
 import com.jjoe64.graphview.series.LineGraphSeries
+import com.enterprise.bulletcross.assistant.R.id.graph
+import com.jjoe64.graphview.Viewport
+
+
 
 /**
  * Service class constantly seeks for importance detection
@@ -39,6 +43,9 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
 
     private var graph:GraphView? = null
 
+    private var series: LineGraphSeries<DataPoint>? = null
+    private var lastX = 0
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -46,8 +53,20 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mLight = mSensorManager!!.getDefaultSensor(Sensor.TYPE_LIGHT)
         graph = findViewById<View>(R.id.graph) as GraphView
-        val series = LineGraphSeries<DataPoint>(arrayOf<DataPoint>(DataPoint(0.0, 1.0), DataPoint(1.0, 5.0), DataPoint(2.0, 3.0), DataPoint(3.0, 2.0), DataPoint(4.0, 6.0)))
+        series = LineGraphSeries()
+        /*val series = LineGraphSeries<DataPoint>(arrayOf<DataPoint>(DataPoint(0.0, 1.0),
+                DataPoint(1.0, 0.0),
+                DataPoint(2.0, 0.0),
+                DataPoint(3.0, 0.0),
+                DataPoint(4.0, 0.0)))*/
+
         graph!!.addSeries(series)
+
+        val viewport = graph!!.getViewport()
+        viewport.isYAxisBoundsManual = true
+        viewport.setMinY(0.0)
+        viewport.setMaxY(20.0)
+        viewport.isScrollable = true
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -57,6 +76,8 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
         val sensor_data = event.values[0]
         rgb_sensor_reading?.setText(sensor_data.toString())
+        lastX++
+        series!!.appendData(DataPoint(lastX.toDouble(), sensor_data.toDouble()), true, 20)
     }
 
     override fun onResume() {

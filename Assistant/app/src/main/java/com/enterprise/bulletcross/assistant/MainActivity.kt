@@ -12,6 +12,7 @@ import android.widget.TextView
 import com.jjoe64.graphview.GraphView
 import com.jjoe64.graphview.series.DataPoint
 import com.jjoe64.graphview.series.LineGraphSeries
+import java.util.Random;
 import com.enterprise.bulletcross.assistant.R.id.graph
 import com.jjoe64.graphview.Viewport
 
@@ -46,6 +47,9 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
     private var series: LineGraphSeries<DataPoint>? = null
     private var lastX = 0
 
+    var r = Random()
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -53,7 +57,7 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
         mSensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mLight = mSensorManager!!.getDefaultSensor(Sensor.TYPE_LIGHT)
         graph = findViewById<View>(R.id.graph) as GraphView
-        series = LineGraphSeries()
+        series = LineGraphSeries<DataPoint>()
         /*val series = LineGraphSeries<DataPoint>(arrayOf<DataPoint>(DataPoint(0.0, 1.0),
                 DataPoint(1.0, 0.0),
                 DataPoint(2.0, 0.0),
@@ -76,14 +80,33 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
         val sensor_data = event.values[0]
         rgb_sensor_reading?.setText(sensor_data.toString())
-        lastX++
-        series!!.appendData(DataPoint(lastX.toDouble(), sensor_data.toDouble()), true, 20)
+        //lastX++
+        //series!!.appendData(DataPoint(lastX.toDouble(), sensor_data.toDouble()), true, 20)
     }
 
     override fun onResume() {
         // Register a listener for the sensor.
         super.onResume()
         mSensorManager!!.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL)
+        // we're going to simulate real time with thread that append data to the graph
+        Thread(Runnable {
+            // we add 100 new entries
+            for (i in 0..99) {
+                runOnUiThread {
+                    lastX++
+                    var randomValue = 0.0 + (20.0 - 0.0) * r.nextDouble()
+                    series!!.appendData(DataPoint(lastX.toDouble(), randomValue), true, 20)
+                }
+
+                // sleep to slow down the add of entries
+                try {
+                    Thread.sleep(600)
+                } catch (e: InterruptedException) {
+                    // manage error ...
+                }
+
+            }
+        }).start()
     }
 
     override fun onPause() {

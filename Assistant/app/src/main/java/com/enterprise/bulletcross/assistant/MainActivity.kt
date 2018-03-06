@@ -15,6 +15,9 @@ import com.jjoe64.graphview.series.LineGraphSeries
 import java.util.Random;
 import com.enterprise.bulletcross.assistant.R.id.graph
 import com.jjoe64.graphview.Viewport
+import android.media.MediaPlayer
+
+
 
 
 
@@ -47,7 +50,8 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
     private var series: LineGraphSeries<DataPoint>? = null
     private var lastX = 0
 
-    var r = Random()
+    private var r = Random()
+    var mp:MediaPlayer? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -71,6 +75,8 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
         viewport.setMinY(0.0)
         viewport.setMaxY(20.0)
         viewport.isScrollable = true
+
+        mp = MediaPlayer.create(this, R.raw.beep)
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -80,6 +86,9 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
         val sensor_data = event.values[0]
         rgb_sensor_reading?.setText(sensor_data.toString())
+        if(sensor_data < 3){
+            mp!!.start()
+        }
         //lastX++
         //series!!.appendData(DataPoint(lastX.toDouble(), sensor_data.toDouble()), true, 20)
     }

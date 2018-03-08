@@ -1,5 +1,6 @@
 package com.enterprise.bulletcross.assistant
 
+import android.app.Service
 import android.content.Context
 import android.hardware.Sensor
 import android.hardware.SensorEvent
@@ -16,9 +17,10 @@ import java.util.Random;
 import com.enterprise.bulletcross.assistant.R.id.graph
 import com.jjoe64.graphview.Viewport
 import android.media.MediaPlayer
-
-
-
+import android.content.Intent
+import android.os.IBinder
+import android.app.Service.START_NOT_STICKY
+import android.os.Binder
 
 
 /**
@@ -39,6 +41,42 @@ import android.media.MediaPlayer
  * State 2 -> [no interaction] -> State 0
  * State 3 -> [interaction] -> State 0
  */
+
+class MyService : Service(),SensorEventListener {
+    private val mBinder = LocalBinder()
+    //var mp:MediaPlayer = MediaPlayer.create(this, R.raw.beep)
+    var sensor_data:Float?= null
+
+    inner class LocalBinder : Binder() {
+        internal val service: MyService
+            get() = this@MyService
+    }
+
+    override fun onStartCommand(intent: Intent, flags: Int, startId: Int): Int {
+        if(sensor_data!! < 5.00){
+            //mp!!.start()
+            println("Serivicing....")
+        }
+        return START_STICKY;
+    }
+
+    override fun onBind(intent: Intent): IBinder? {
+        return mBinder;
+    }
+
+    override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
+        // Do something here if sensor accuracy changes.
+    }
+
+    override fun onSensorChanged(event: SensorEvent) {
+        sensor_data= event.values[0]
+        /*if(sensor_data!! < 5.00){
+            mp!!.start()
+        }*/
+        //lastX++
+        //series!!.appendData(DataPoint(lastX.toDouble(), sensor_data.toDouble()), true, 20)
+    }
+}
 
 class MainActivity : AppCompatActivity(),SensorEventListener {
     var rgb_sensor_reading:TextView? = null
@@ -77,6 +115,8 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
         viewport.isScrollable = true
 
         mp = MediaPlayer.create(this, R.raw.beep)
+
+        startService(Intent(this@MainActivity, MyService::class.java))
     }
 
     override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {
@@ -86,9 +126,10 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
     override fun onSensorChanged(event: SensorEvent) {
         val sensor_data = event.values[0]
         rgb_sensor_reading?.setText(sensor_data.toString())
-        if(sensor_data < 3){
+        /*if(sensor_data < 3){
             mp!!.start()
-        }
+        }*/
+
         //lastX++
         //series!!.appendData(DataPoint(lastX.toDouble(), sensor_data.toDouble()), true, 20)
     }

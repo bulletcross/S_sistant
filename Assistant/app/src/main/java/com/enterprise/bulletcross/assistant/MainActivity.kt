@@ -44,7 +44,7 @@ import android.os.Binder
 
 class MyService : Service(),SensorEventListener {
     private val mBinder = LocalBinder()
-    //var mp:MediaPlayer = MediaPlayer.create(this, R.raw.beep)
+    var mp:MediaPlayer = MediaPlayer.create(this, R.raw.beep)
     var sensor_data:Float?= null
 
     inner class LocalBinder : Binder() {
@@ -70,9 +70,9 @@ class MyService : Service(),SensorEventListener {
 
     override fun onSensorChanged(event: SensorEvent) {
         sensor_data= event.values[0]
-        /*if(sensor_data!! < 5.00){
+        if(sensor_data!! < 5.00){
             mp!!.start()
-        }*/
+        }
         //lastX++
         //series!!.appendData(DataPoint(lastX.toDouble(), sensor_data.toDouble()), true, 20)
     }
@@ -100,11 +100,6 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
         mLight = mSensorManager!!.getDefaultSensor(Sensor.TYPE_LIGHT)
         graph = findViewById<View>(R.id.graph) as GraphView
         series = LineGraphSeries<DataPoint>()
-        /*val series = LineGraphSeries<DataPoint>(arrayOf<DataPoint>(DataPoint(0.0, 1.0),
-                DataPoint(1.0, 0.0),
-                DataPoint(2.0, 0.0),
-                DataPoint(3.0, 0.0),
-                DataPoint(4.0, 0.0)))*/
 
         graph!!.addSeries(series)
 
@@ -138,17 +133,13 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
         // Register a listener for the sensor.
         super.onResume()
         mSensorManager!!.registerListener(this, mLight, SensorManager.SENSOR_DELAY_NORMAL)
-        // we're going to simulate real time with thread that append data to the graph
         Thread(Runnable {
-            // we add 100 new entries
             for (i in 0..99) {
                 runOnUiThread {
                     lastX++
                     var randomValue = 0.0 + (20.0 - 0.0) * r.nextDouble()
                     series!!.appendData(DataPoint(lastX.toDouble(), randomValue), true, 20)
                 }
-
-                // sleep to slow down the add of entries
                 try {
                     Thread.sleep(600)
                 } catch (e: InterruptedException) {
@@ -160,7 +151,6 @@ class MainActivity : AppCompatActivity(),SensorEventListener {
     }
 
     override fun onPause() {
-        // Be sure to unregister the sensor when the activity pauses.
         super.onPause()
         mSensorManager!!.unregisterListener(this)
     }
